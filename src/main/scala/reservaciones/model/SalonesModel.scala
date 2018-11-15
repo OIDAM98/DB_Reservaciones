@@ -54,10 +54,9 @@ trait SalonesModel {
   def deleteSalonById(id: String) =
     deleteSalon(Salon(id, 0, ""))
 
-
   def updateCapSalon(toUp: Salon) =
     toUp match {
-      case Salon(id, cap, tipo) => sql"update salones set capacidad = $cap where idsalon = $id"
+      case Salon(id, cap, _) => sql"update salones set capacidad = $cap where idsalon = $id"
         .update
         .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
         .transact(Connection.xa)
@@ -66,7 +65,7 @@ trait SalonesModel {
 
   def updateTipoSalon(toUp: Salon) =
     toUp match {
-      case Salon(id, cap, tipo) => sql"update salones set tipo = $cap where idsalon = $id"
+      case Salon(id, _, tipo) => sql"update salones set tipo = $tipo where idsalon = $id"
         .update
         .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
         .transact(Connection.xa)
