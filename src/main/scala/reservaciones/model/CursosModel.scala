@@ -5,7 +5,7 @@ import doobie.implicits._
 
 case class Curso(clave: String, secc: Int, titulo: String, prof: String)
 
-object CursosModel extends SearchableCourse with InsertableCourse with DeletableCourse
+object CursosModel extends SearchableCourse with InsertableCourse with DeletableCourse with UpdateableCourse
 
 trait SearchableCourse {
 
