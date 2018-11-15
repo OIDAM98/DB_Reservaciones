@@ -4,7 +4,9 @@ import doobie.implicits._
 
 case class Salon(idsalon: String, capacidad: Int, tipo: String)
 
-trait SalonesModel {
+object SalonesModel extends SearchableClassroom with InsertableClassroom with DeletableClassroom with UpdateableClassroom
+
+trait SearchableClassroom{
   def getAllClassrooms() =
     sql"select * from salones"
       .query[Salon]
@@ -31,16 +33,23 @@ trait SalonesModel {
       .option
       .transact(Connection.xa)
       .unsafeRunSync()
+}
 
-  def insertSalon(id: String, cap: Int, tipo: String) =
-    sql"insert into salones (idsalon, capacidad, tipo) values ($id, $cap, $tipo)"
-      .update
-      .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
-      .transact(Connection.xa)
-      .unsafeRunSync
+trait InsertableClassroom {
+  def insertSalon(toIns: Salon) =
+    toIns match {
+      case Salon(id, cap, tipo) => sql"insert into salones (idsalon, capacidad, tipo) values ($id, $cap, $tipo)"
+        .update
+        .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
+        .transact(Connection.xa)
+        .unsafeRunSync
+    }
 
   def insertSalonOnlyID(id: String) =
-    insertSalon(id, 0, "")
+    insertSalon(Salon(id, 0, ""))
+}
+
+trait DeletableClassroom {
 
   def deleteSalon(toDel: Salon) =
     toDel match {
@@ -53,6 +62,23 @@ trait SalonesModel {
 
   def deleteSalonById(id: String) =
     deleteSalon(Salon(id, 0, ""))
+
+  def deleteSalonesByCap(cap: Int) =
+    sql"delete from salones where capacidad = $cap"
+      .update
+      .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
+      .transact(Connection.xa)
+      .unsafeRunSync
+
+  def deleteSalonesByTipo(tipo: String) =
+    sql"delete from salones where tipo = $tipo"
+      .update
+      .withUniqueGeneratedKeys("idsalon","capacidad","tipo")
+      .transact(Connection.xa)
+      .unsafeRunSync
+}
+
+trait UpdateableClassroom {
 
   def updateCapSalon(toUp: Salon) =
     toUp match {
@@ -71,5 +97,4 @@ trait SalonesModel {
         .transact(Connection.xa)
         .unsafeRunSync
     }
-
 }
