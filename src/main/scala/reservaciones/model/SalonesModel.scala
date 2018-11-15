@@ -15,7 +15,8 @@ trait SearchableClassroom{
       .unsafeRunSync()
 
   def findSalonByID(search: String) =
-    sql"select * from salones where idsalon = $search".query[Salon]
+    sql"select * from salones where idsalon = $search"
+      .query[Salon]
       .option
       .transact(Connection.xa)
       .unsafeRunSync()
