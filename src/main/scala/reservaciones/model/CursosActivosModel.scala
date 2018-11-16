@@ -1,5 +1,7 @@
 package reservaciones.model
 
+import java.sql.Date
+
 import doobie.implicits._
 
 case class CursoActivo(clave: String, secc: Int, titulo: String)
@@ -8,12 +10,22 @@ object CursosActivosModel extends SearchableCurActivo with InsertableCurActivo
 
 trait SearchableCurActivo {
 
-  def getAllActiveCourses =
+  def getAllActiveCourses() =
     sql"select * from cursosactivos"
     .query[CursoActivo]
     .to[Array]
     .transact(Connection.xa)
     .unsafeRunSync
+
+  def getAllCurrentActiveCourses() = {
+    val today = new Date( new java.util.Date().getTime )
+    sql"select c.clave, c.secc, c.titulo from cursosactivos c natural join periodos where $today between fechaini and fechafin"
+      .query[CursoActivo]
+      .to[List]
+      .transact(Connection.xa)
+      .unsafeRunSync
+
+  }
 
   def findCursoActivo(toSearch: CursoActivo) =
     toSearch match {

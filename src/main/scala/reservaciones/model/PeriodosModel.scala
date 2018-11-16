@@ -59,12 +59,6 @@ trait InsertablePeriod {
         .unsafeRunSync
     }
 
-  def insertPeriodoByTitulo(titulo: String) = {
-    val today = new Date( new java.util.Date().getTime )
-    val tomorrow = new Date( today.getTime + 24*60*60*1000 )
-    insertPeriodo(Periodo(titulo, today, tomorrow))
-  }
-
 }
 
 trait DeletablePeriod {
