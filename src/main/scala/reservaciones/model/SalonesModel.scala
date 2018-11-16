@@ -7,6 +7,7 @@ case class Salon(idsalon: String, capacidad: Int, tipo: String)
 object SalonesModel extends SearchableClassroom with InsertableClassroom with DeletableClassroom with UpdateableClassroom
 
 trait SearchableClassroom{
+
   def getAllClassrooms() =
     sql"select * from salones"
       .query[Salon]
