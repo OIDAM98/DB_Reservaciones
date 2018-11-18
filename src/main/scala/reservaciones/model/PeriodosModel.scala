@@ -4,113 +4,50 @@ import java.sql.Date
 
 import doobie.implicits._
 
-case class Periodo(titulo: String, fechaini: Date, fechafin: Date)
+case class Periodo(titulo: String, fechaini: Date, fechafin: Date){
+  require(titulo.length <= 20)
+  override def toString: String = s"$titulo $fechaini $fechafin"
+}
 
-object PeriodosModel extends SearchablePeriod with InsertablePeriod with DeletablePeriod with UpdateablePeriod
+object PeriodosModel extends SearchablePeriod with InsertablePeriod
 
 trait SearchablePeriod {
 
   def getAllPeriods() =
     sql"select * from periodos"
-      .query[Salon]
-      .to[Array]
-      .transact(Connection.xa)
-      .unsafeRunSync()
+      .query[Periodo]
+
+  def getCurrentPeriod() ={
+    val today = new Date( new java.util.Date().getTime )
+    sql"select * from periodos where $today between fechainicio and fechafin"
+      .query[Periodo]
+  }
 
   def findPeriodo(toSearch: Periodo) =
     toSearch match {
-      case Periodo(titulo, ini, fin) => sql"select * from periodos where titulo = $titulo and fechaini = $ini and fechafin = $fin"
+      case Periodo(titulo, ini, fin) => sql"select * from periodos where titulo = $titulo and fechainicio = $ini and fechafin = $fin"
         .query[Periodo]
-        .option
-        .transact(Connection.xa)
-        .unsafeRunSync()
     }
 
-  def findPeriodoByTitulo(titulo: String) =
-    sql"select * from periodo where titulo = $titulo"
+  def findPeriodosByTitulo(titulo: String) =
+    sql"select * from periodos where titulo = $titulo"
       .query[Periodo]
-      .option
-      .transact(Connection.xa)
-      .unsafeRunSync()
 
-  def findPeriodoByIni(ini: Date) =
-    sql"select * from periodo where fechaini = $ini"
+  def findPeriodosByIni(ini: Date) =
+    sql"select * from periodos where fechainicio = $ini"
       .query[Periodo]
-      .option
-      .transact(Connection.xa)
-      .unsafeRunSync()
 
-  def findPeriodoByFin(fin: Date) =
-    sql"select * from periodo where fechafin = $fin"
+  def findPeriodosByFin(fin: Date) =
+    sql"select * from periodos where fechafin = $fin"
       .query[Periodo]
-      .option
-      .transact(Connection.xa)
-      .unsafeRunSync()
 }
 
 trait InsertablePeriod {
 
   def insertPeriodo(toIns: Periodo) =
     toIns match {
-      case Periodo(titulo, ini, fin) => sql"insert into periodos (titulo, fechaini, fechafin) values ($titulo, $ini, $fin)"
+      case Periodo(titulo, ini, fin) => sql"insert into periodos (titulo, fechainicio, fechafin) values ($titulo, $ini, $fin)"
         .update
-        .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-        .transact(Connection.xa)
-        .unsafeRunSync
-    }
-
-}
-
-trait DeletablePeriod {
-  def deletePeriodo(toDel: Periodo) =
-    toDel match {
-      case Periodo(titulo, ini, fin) => sql"delete from periodos where titulo = $titulo and fechaini = $ini and fechafin = $fin"
-        .update
-        .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-        .transact(Connection.xa)
-        .unsafeRunSync
-    }
-
-  def deletePeriodoByTitulo(titulo: String) =
-    sql"delete from periodos where titulo = $titulo"
-      .update
-      .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-      .transact(Connection.xa)
-      .unsafeRunSync
-
-  def deletePeriodoByIni(ini: Date) =
-    sql"delete from periodos where fechaini = $ini"
-      .update
-      .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-      .transact(Connection.xa)
-      .unsafeRunSync
-
-  def deletePeriodoByFin(fin: Date) =
-    sql"delete from periodos where fechafin = $fin"
-      .update
-      .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-      .transact(Connection.xa)
-      .unsafeRunSync
-}
-
-trait UpdateablePeriod {
-
-  def updateIniPeriod(toUp: Periodo) =
-    toUp match {
-      case Periodo(titulo, ini, _) => sql"update salones set fechaini = $ini where titulo = $titulo"
-        .update
-        .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-        .transact(Connection.xa)
-        .unsafeRunSync
-    }
-
-  def updateFinPeriod(toUp: Periodo) =
-    toUp match {
-      case Periodo(titulo, _, fin) => sql"update salones set fechafin = $fin where titulo = $titulo"
-        .update
-        .withUniqueGeneratedKeys("titulo","fechaini","fechafin")
-        .transact(Connection.xa)
-        .unsafeRunSync
     }
 
 }
