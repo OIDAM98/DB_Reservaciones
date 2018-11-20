@@ -17,6 +17,8 @@
     4. <s>Salones</s>
     5. Reservaciones
     
+    
+_Deleted for now!_
 3. Implement Typecheck Tests on Queries
     1. <s>CursosModel</s>
     2. <s>CursosActivosModel</s>
@@ -24,13 +26,12 @@
     4. <s>SalonesModel</s>
     5. ReservacionesModel
     
-4. Implement Integration Tests (__HAVING TROUBLES!__)
+4. Implement Integration Tests
     1. <s>CursosModel</s>
     2. <s>CursosActivosModel</s>
     3. <s>PeriodosModel</s>
     4. <s>SalonesModel</s>
     5. ReservacionesModel
-    6. _Search about testing on databases (in general, not only in Scala)_
     
 5. Implement View
     1. MainPanel

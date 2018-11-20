@@ -12,7 +12,7 @@ case class CursoActivo(clave: String, secc: Int, titulo: String){
   override def toString: String = s"$clave $secc $titulo"
 }
 
-object CursosActivosModel extends SearchableCurActivo with InsertableCurActivo
+object CursosActivosModel extends SearchableCurActivo with InsertableCurActivo with DeletableCurActivo
 
 trait SearchableCurActivo {
 
@@ -55,4 +55,12 @@ trait InsertableCurActivo {
         .update
     }
 
+}
+
+trait DeletableCurActivo {
+  def deleteCursoActivo(toDel: CursoActivo) =
+    toDel match {
+      case CursoActivo(clave, secc, titulo) => sql"delete from cursosactivos where clave = $clave and secc = $secc and titulo = $titulo"
+        .update
+    }
 }
