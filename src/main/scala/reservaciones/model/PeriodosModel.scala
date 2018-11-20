@@ -1,10 +1,11 @@
 package reservaciones.model
 
-import java.sql.Date
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 import doobie.implicits._
 
-case class Periodo(titulo: String, fechaini: Date, fechafin: Date){
+case class Periodo(titulo: String, fechaini: Timestamp, fechafin: Timestamp){
   require(titulo.length <= 20)
   override def toString: String = s"$titulo $fechaini $fechafin"
 }
@@ -18,7 +19,7 @@ trait SearchablePeriod {
       .query[Periodo]
 
   def getCurrentPeriod() ={
-    val today = new Date( new java.util.Date().getTime )
+    val today = Timestamp.valueOf(LocalDateTime.now())
     sql"select * from periodos where $today between fechainicio and fechafin"
       .query[Periodo]
   }
@@ -33,11 +34,11 @@ trait SearchablePeriod {
     sql"select * from periodos where titulo = $titulo"
       .query[Periodo]
 
-  def findPeriodosByIni(ini: Date) =
+  def findPeriodosByIni(ini: Timestamp) =
     sql"select * from periodos where fechainicio = $ini"
       .query[Periodo]
 
-  def findPeriodosByFin(fin: Date) =
+  def findPeriodosByFin(fin: Timestamp) =
     sql"select * from periodos where fechafin = $fin"
       .query[Periodo]
 }

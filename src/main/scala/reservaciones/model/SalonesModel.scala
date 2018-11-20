@@ -8,7 +8,7 @@ case class Salon(idsalon: String, capacidad:Int, tipo: String){
   override val toString = s"$idsalon $capacidad $tipo"
 }
 
-object SalonesModel extends SearchableClassroom with InsertableClassroom
+object SalonesModel extends SearchableClassroom with InsertableClassroom with DeletableClassroom
 
 trait SearchableClassroom{
 
@@ -37,7 +37,14 @@ trait InsertableClassroom {
     toIns match {
       case Salon(id, cap, tipo) => sql"insert into salones (idsalon, capacidad, tipo) values ($id, $cap, $tipo)"
         .update
-        //.withUniqueGeneratedKeys[Salon]("idsalon","capacidad","tipo")
     }
 
+}
+
+trait DeletableClassroom {
+  def deleteSalon(toDel: Salon) =
+    toDel match {
+      case Salon(idsalon, capacidad, tipo) => sql"delete from salones where idsalon = $idsalon and capacidad = $capacidad and tipo = $tipo"
+        .update
+    }
 }

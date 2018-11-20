@@ -1,6 +1,7 @@
 package reservaciones.model
 
-import java.sql.Date
+import java.sql.{Timestamp}
+import java.time.{LocalDateTime}
 
 import doobie.implicits._
 
@@ -20,7 +21,7 @@ trait SearchableCurActivo {
     .query[CursoActivo]
 
   def getAllCurrentActiveCourses() = {
-    val today = new Date( new java.util.Date().getTime )
+    val today = Timestamp.valueOf(LocalDateTime.now())
     sql"select c.clave, c.secc, c.titulo from cursosactivos c natural join periodos where $today between fechainicio and fechafin"
       .query[CursoActivo]
   }

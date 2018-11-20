@@ -11,7 +11,7 @@ case class Curso(clave: String, secc: Int, titulo: String, prof: String) {
   override def toString: String = s"$clave $secc $titulo $prof"
 }
 
-    object CursosModel extends SearchableCourse with InsertableCourse
+object CursosModel extends SearchableCourse with InsertableCourse with DeletableCourse
 
 
 trait SearchableCourse {
@@ -52,13 +52,9 @@ trait InsertableCourse {
 trait DeletableCourse {
 
   def deleteCurso(toDel: Curso) =
-
     toDel match {
       case Curso(cKey, cSecc, _, _) => sql"delete from cursos where clave = $cKey and secc = $cSecc"
         .update
-        .withUniqueGeneratedKeys("clave","secc","titulo", "prof")
-        .transact(Connection.xa)
-        .unsafeRunSync
     }
 
 }

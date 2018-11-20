@@ -11,49 +11,32 @@ object ResevacionesModel
 
 trait SearchableReserv{
 
-  def getAllReservaciones(): List[Reservacion] =
+  def getAllReservaciones() =
     sql"select * from reservaciones"
       .query[Reservacion]
-      .to[List]
-      .transact(Connection.xa)
-      .unsafeRunSync
 
-  def getAllActiveReservaciones(): List[Reservacion] = {
+  def getAllActiveReservaciones() = {
     val today = new Date( new java.util.Date().getTime )
     sql"select * from reservaciones where fechafin >= $today"
       .query[Reservacion]
-      .to[List]
-      .transact(Connection.xa)
-      .unsafeRunSync
   }
 
 }
 
 trait TimetableSalones{
 
-  def getTimetableSalon(id: String): List[Reservacion] = {
+  def getTimetableSalon(id: String) =
     sql"select * from reservaciones where idsalon = $id"
       .query[Reservacion]
-      .to[List]
-      .transact(Connection.xa)
-      .unsafeRunSync
-  }
 
-  def getFreeSalones(day: Date): List[Reservacion] =
+  def getFreeSalones(day: Date) =
     sql"select * from reservaciones where idsalon in (select idsalon from reservaciones where $day is between fechaini and fechafin group by idsalon having sum(fechafin::time - fechaini::time) < 14)"
       .query[Reservacion]
-      .to[List]
-      .transact(Connection.xa)
-      .unsafeRunSync
 
-
-  def getFreeSalonesInterval(ini: Date, fin: Date) = {
+  def getFreeSalonesInterval(ini: Date, fin: Date) =
     sql"select * from reservaciones where ($ini not between fechaini and fechafin) and ($fin not between fechaini and fechafin)"
       .query[Reservacion]
-      .to[List]
-      .transact(Connection.xa)
-      .unsafeRunSync
-  }
+
 }
 
 trait DeleteableReserv {
@@ -62,9 +45,6 @@ trait DeleteableReserv {
     toDel match {
       case CursoActivo(clave, secc, titulo) => sql"delete from reservaciones where clave = $clave and secc = $secc and titulo = $titulo"
         .update
-        .withUniqueGeneratedKeys("clave","secc","titulo")
-        .transact(Connection.xa)
-        .unsafeRunSync
     }
 
   def deleteHorarioCursos(del: List[CursoActivo]) = del foreach deleteHorarioCurso

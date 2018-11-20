@@ -1,13 +1,12 @@
 package reservaciones.model
 
 import cats.effect.IO
-import doobie.free.connection.ConnectionIO
 import doobie.util.query.Query0
 import doobie.util.transactor.Transactor
 
 import scala.concurrent.ExecutionContext
 import doobie.implicits._
-
+import doobie.util.update.Update0
 
 object Connection {
   implicit val cs = IO.contextShift(ExecutionContext.global)
@@ -15,9 +14,15 @@ object Connection {
     "org.postgresql.Driver", "jdbc:postgresql:universitydb", "postgres", "dulioscar"
   )
 
-  def executeQuery[A](t: A, query: Query0[A]) = query.option.transact(xa).unsafeRunSync
-  def executeListQuery[A](t: A, query: Query0[A]) = query.to[List].transact(xa).unsafeRunSync
+  def executeQuery[A](query: Query0[A]) = query.option.transact(xa).unsafeRunSync()
+  def executeListQuery[A](query: Query0[A]) = query.to[List].transact(xa).unsafeRunSync
 
-  def executeUpdate[A](up: ConnectionIO[A]) = up.transact(xa).unsafeRunSync
+  def executeUpdate[A](t: A, up: Update0) = t match {
+    case Salon => up.withUniqueGeneratedKeys[Salon]("idsalon", "capacidad", "tipo").transact(xa).unsafeRunAsyncAndForget
+    case Reservacion => up.withUniqueGeneratedKeys[Reservacion]("clave","secc","titulo").transact(xa).unsafeRunSync
+    case Curso => up.withUniqueGeneratedKeys[Curso]("clave","secc","titulo", "prof").transact(xa).unsafeRunSync
+    case CursoActivo => up.withUniqueGeneratedKeys[CursoActivo]("clave", "secc", "titulo").transact(xa).unsafeRunSync
+    case Periodo => up.withUniqueGeneratedKeys[Periodo]("titulo", "fechainicio", "fechafin").transact(xa).unsafeRunSync
+  }
 
 }
