@@ -1,41 +1,40 @@
 package modelTest
 
 import cats.effect.IO
-
 import doobie.util.transactor.Transactor
 import doobie.scalatest._
-import doobie.util.query.Query0
-import doobie.util.update.Update0
 import doobie.implicits._
-
+import doobie.util.transactor.Transactor.Aux
 import reservaciones.model.{Salon, SalonesModel}
-
 import org.scalacheck.Gen
 import org.scalacheck.Prop.BooleanOperators
-
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 
 import scala.concurrent.ExecutionContext
 
-object DB {
-  implicit val cs = IO.contextShift(ExecutionContext.global)
-  val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", "jdbc:postgresql:universitydb", "postgres", "dulioscar"
-  )
+trait DBTest extends BeforeAndAfterEach { this: Suite =>
+  var xa: Aux[IO, Unit] = _
 
-  def executeQuery[A](query: Query0[A]) = query.option.transact(xa).unsafeRunSync
+  override def beforeEach(){
+    implicit val cs = IO.contextShift(ExecutionContext.global)
+    xa = Transactor.fromDriverManager[IO](
+      "org.postgresql.Driver", "jdbc:postgresql:universitydb", "postgres", "dulioscar"
+    )
+    super.beforeEach()
+  }
 
-  def executeListQuery[A](query: Query0[A]) = query.to[List].transact(xa).unsafeRunSync
-
-  def executeUpdate( up: Update0) = up.withUniqueGeneratedKeys[Salon]("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
+  override def afterEach(){
+    try super.afterEach()
+    finally xa = null
+  }
 }
 
-class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen {
+class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with DBTest {
 
   describe("SalonesModel") {
     it("get all Salones from the Database"){
-      val all = DB.executeListQuery(SalonesModel.getAllClassrooms())
+      val all = SalonesModel.getAllClassrooms().to[List].transact(xa).unsafeRunSync
       all should not be empty
     }
 
@@ -43,7 +42,7 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen {
       Given("a specific Salon to search")
       val sal = Salon("awz-835", 60, "C")
       When("the Salon is obtained")
-      val res = DB.executeQuery(SalonesModel.findSalon(sal))
+      val res = SalonesModel.findSalon(sal).option.transact(xa).unsafeRunSync
       Then("the result should be of type Some")
       res shouldBe defined
       And("should contain the Salon searched")
@@ -54,7 +53,7 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen {
       Given("a specific tipo of Salones to find")
       val t = "C"
       When("the list of Salones of certain Tipo is obained")
-      val res = DB.executeListQuery(SalonesModel.findSalonesByTipo(t))
+      val res = SalonesModel.findSalonesByTipo(t).to[List].transact(xa).unsafeRunSync
       Then("the list should not be empty")
       res should not be empty
       And("should be a List")
@@ -67,7 +66,7 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen {
       Given("a specific Capacidad of Salones to find")
       val cap = 50
       When("the list of Salones of certain Capacidad is obtained")
-      val res = DB.executeListQuery(SalonesModel.findSalonesByCap(cap))
+      val res = SalonesModel.findSalonesByCap(cap).to[List].transact(xa).unsafeRunSync
       Then("the list should not be empty")
       res should not be empty
       And("should be a List")
@@ -80,18 +79,18 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen {
       Given("a Salon to insert")
       val ins = Salon("ia-205", 50, "C")
       When("the Salon is inserted correctly to the Database")
-      DB.executeUpdate(SalonesModel.insertSalon(ins))
+      SalonesModel.insertSalon(ins).withUniqueGeneratedKeys("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
       Then("searching for that Salon should return that salon")
-      DB.executeQuery(SalonesModel.findSalon(ins)) shouldBe Some(ins)
+      SalonesModel.findSalon(ins).option.transact(xa).unsafeRunSync shouldBe Some(ins)
     }
 
     it("delete a Salon from the Database"){
       Given("a Salon to insert")
       val del = Salon("ia-205", 50, "C")
       When("the Salon is deleted correctly from the Database")
-      DB.executeUpdate(SalonesModel.deleteSalon(del))
+      SalonesModel.deleteSalon(del).withUniqueGeneratedKeys("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
       Then("searching for that Salon should return None")
-      DB.executeQuery(SalonesModel.findSalon(del)) shouldBe None
+      SalonesModel.findSalon(del).option.transact(xa).unsafeRunSync shouldBe None
     }
 
   }
