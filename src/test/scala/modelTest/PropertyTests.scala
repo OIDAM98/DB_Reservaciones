@@ -1,5 +1,8 @@
 package modelTest
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+
 import reservaciones.model.{Curso, CursoActivo, Salon}
 import org.scalacheck.Gen
 import org.scalacheck.Prop.BooleanOperators
@@ -23,10 +26,9 @@ class SalonCheckPropierties extends PropSpec with PropertyChecks with Matchers{
 
 }
 
-
 class CursoCheckPropierties extends PropSpec with PropertyChecks with Matchers{
 
-  property("Cursos es compatible con la base de datos (Restricciones de Dominio)") {
+  property("Cursos is compatible with the Database (Domain Restrictions") {
     forAll(
       Gen.alphaStr.retryUntil(_.length <= 10 ),
       Gen.posNum[Int],
@@ -48,19 +50,34 @@ class CursoCheckPropierties extends PropSpec with PropertyChecks with Matchers{
 
 class CursoActivoCheckPropierties extends PropSpec with PropertyChecks with Matchers {
 
-  property("CursosActivos es compatible con la base de datos (Restricciones de Dominio)") {
+  property("CursosActivos is compatible with the Database (Domain Restrictions)") {
     forAll(
       Gen.alphaStr.retryUntil(_.length <= 10 ),
       Gen.posNum[Int],
       Gen.alphaUpperStr.retryUntil(_.length <= 20)) {
-      (clave: String, secc: Int, titulo: String) => {
-        (clave.length <= 10 && titulo.length <= 20) ==> {
-          val cur = CursoActivo(clave, secc, titulo)
+      (clave: String, secc: Int, periodo: String) => {
+        (clave.length <= 10 && periodo.length <= 20) ==> {
+          val cur = CursoActivo(clave, secc, periodo)
           cur.clave == clave
           cur.secc == secc
-          cur.titulo == titulo
+          cur.periodo == periodo
         }
       }
     }
   }
 }
+
+/*
+class PeriodoCheckProperties extends PropSpec with PropertyChecks with Matchers {
+
+  property("Periodo is compatible with the Database (Domain Restrictions)") {
+    forAll(
+      Gen.alphaStr.retryUntil(_.length <= 20),
+      Gen.
+    ) {
+
+    }
+  }
+
+}
+*/

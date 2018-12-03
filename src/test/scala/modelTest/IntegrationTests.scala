@@ -37,13 +37,11 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
 
   describe("SalonesModel") {
     it("get all Salones from the Database"){
-      println("getAllSalones")
       val all = SalonesModel.getAllClassrooms().to[List].transact(xa).unsafeRunSync
       all should not be empty
     }
 
     it("find a specific Salon on the Database"){
-      println("findSalon")
       Given("a specific Salon to search")
       val sal = Salon("awz-835", 60, "C")
       When("the Salon is obtained")
@@ -55,7 +53,6 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
     }
 
     it("find all Salones by Tipo"){
-      println("findSalonByTipo")
       Given("a specific tipo of Salones to find")
       val t = "C"
       When("the list of Salones of certain Tipo is obained")
@@ -69,7 +66,6 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
     }
 
     it("find all Salones by Capacidad") {
-      println("findSalonesByCap")
       Given("a specific Capacidad of Salones to find")
       val cap = 50
       When("the list of Salones of certain Capacidad is obtained")
@@ -83,7 +79,6 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
     }
 
     it("insert a Salon to the Database"){
-      println("insertSalon")
       Given("a Salon to insert")
       val ins = Salon("ia-205", 50, "C")
       When("the Salon is inserted correctly to the Database")
@@ -93,7 +88,6 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
     }
 
     it("delete a Salon from the Database"){
-      println("deleteSalon")
       Given("a Salon to insert")
       val del = Salon("ia-205", 50, "C")
       When("the Salon is deleted correctly from the Database")
@@ -159,7 +153,6 @@ class PeriodosModelOpTest extends FunSpec with Matchers with GivenWhenThen with 
       PeriodosModel.insertPeriodo(ins).withUniqueGeneratedKeys[Periodo]("titulo", "fechainicio", "fechafin").transact(xa).unsafeRunSync
       Then("searching for that Periodo should result that Periodo")
       val res = PeriodosModel.findPeriodo(ins).option.transact(xa).unsafeRunSync
-      println("s")
       res shouldBe Some(ins)
     }
 

@@ -22,6 +22,10 @@ trait SearchableClassroom{
         .query[Salon]
     }
 
+  def findSalon(id: String) =
+    sql"select * from salones where idsalon = $id"
+    .query[Salon]
+
   def findSalonesByCap(cap: Int) =
     sql"select * from salones where capacidad = $cap"
       .query[Salon]

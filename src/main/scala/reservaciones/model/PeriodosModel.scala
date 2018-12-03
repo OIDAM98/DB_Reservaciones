@@ -7,6 +7,7 @@ import doobie.implicits._
 
 case class Periodo(titulo: String, fechaini: Timestamp, fechafin: Timestamp){
   require(titulo.length <= 20)
+  require(fechaini before fechafin)
   override def toString: String = s"$titulo $fechaini $fechafin"
 }
 

@@ -5,11 +5,11 @@ import java.time.{LocalDateTime}
 
 import doobie.implicits._
 
-case class CursoActivo(clave: String, secc: Int, titulo: String){
+case class CursoActivo(clave: String, secc: Int, periodo: String){
   require(clave.length <= 10)
-  require(titulo.length <= 20)
+  require(periodo.length <= 20)
 
-  override def toString: String = s"$clave $secc $titulo"
+  override def toString: String = s"$clave $secc $periodo"
 }
 
 object CursosActivosModel extends SearchableCurActivo with InsertableCurActivo with DeletableCurActivo
@@ -22,13 +22,13 @@ trait SearchableCurActivo {
 
   def getAllCurrentActiveCourses() = {
     val today = Timestamp.valueOf(LocalDateTime.now())
-    sql"select c.clave, c.secc, c.titulo from cursosactivos c natural join periodos where $today between fechainicio and fechafin"
+    sql"select c.clave, c.secc, c.periodo from cursosactivos c natural join periodos where $today between fechainicio and fechafin"
       .query[CursoActivo]
   }
 
   def findCursoActivo(toSearch: CursoActivo) =
     toSearch match {
-      case CursoActivo(clave, secc, titulo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and titulo = $titulo"
+      case CursoActivo(clave, secc, periodo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and periodo = $periodo"
         .query[CursoActivo]
     }
 
@@ -41,8 +41,8 @@ trait SearchableCurActivo {
     .query[CursoActivo]
 
 
-  def findCursosActivoByPeriodo(titulo: String) =
-    sql"select * from cursosactivos where titulo = $titulo"
+  def findCursosActivoByPeriodo(periodo: String) =
+    sql"select * from cursosactivos where periodo = $periodo"
       .query[CursoActivo]
 
 }
@@ -60,7 +60,7 @@ trait InsertableCurActivo {
 trait DeletableCurActivo {
   def deleteCursoActivo(toDel: CursoActivo) =
     toDel match {
-      case CursoActivo(clave, secc, titulo) => sql"delete from cursosactivos where clave = $clave and secc = $secc and titulo = $titulo"
+      case CursoActivo(clave, secc, periodo) => sql"delete from cursosactivos where clave = $clave and secc = $secc and periodo = $periodo"
         .update
     }
 }
