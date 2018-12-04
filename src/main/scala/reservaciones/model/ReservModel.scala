@@ -33,28 +33,54 @@ trait TimetableSalones{
     }
   }
 
-  def insertReservSpecificDay(toRes: Salon, day: Int, h: Int, min: Int, cur: Option[CursoActivo], name: String) = {
+  def insertReservSpecificDay(toRes: Salon, day: Int, ini: Tuple2[Int, Int], end: Tuple2[Int, Int], cur: Option[CursoActivo], name: String) = {
+
     val periodo = Connection.executeQuery(PeriodosModel.getCurrentPeriod())
-    val ini = periodo match {
+
+    val periodStart = periodo match {
       case Some(Periodo(titulo, fechaini, fechafin)) => fechaini.toLocalDateTime.getDayOfWeek.getValue
     }
-    val inter1 = Math.abs(day - ini)
-    val start = Timestamp.valueOf(periodo.get.fechaini.toLocalDateTime.plusDays(inter1))
-    val ini2 = periodo match {
-      case Some(Periodo(titulo, fechaini, fechafin)) => fechafin.toLocalDateTime.getDayOfWeek.getValue
+    val inter1 = day - periodStart
+
+    val dateStart =
+      if (inter1 > 0) periodo.get.fechaini.toLocalDateTime.toLocalDate.plusDays(inter1).atTime(ini._1, ini._2)
+      else if (inter1 < 0) periodo.get.fechaini.toLocalDateTime.toLocalDate.plusDays(7 + inter1).atTime(ini._1, ini._2)
+      else periodo.get.fechaini.toLocalDateTime.toLocalDate.atTime(ini._1, ini._2)
+
+
+    val start = Timestamp.valueOf(dateStart)
+
+    val periodEnd = periodo match {
+      case Some(Periodo(titulo, fechaini, fechafin)) => fechafin.toLocalDateTime.toLocalDate.getDayOfWeek.getValue
     }
-    val inter2 = Math.abs(ini2 - day)
-    val fin = Timestamp.valueOf(periodo.get.fechaini.toLocalDateTime.minusDays(inter2))
+    val inter2 = periodEnd - day
+    val dateEnd =
+       if (inter2 > 0) periodo.get.fechafin.toLocalDateTime.toLocalDate.minusDays(inter2).atTime(ini._1, ini._2)
+      else if (inter2 < 0) periodo.get.fechafin.toLocalDateTime.toLocalDate.minusDays(7 + inter2).atTime(ini._1, ini._2)
+      else periodo.get.fechafin.toLocalDateTime.toLocalDate.atTime(ini._1, ini._2)
+
+    val fin = Timestamp.valueOf(dateEnd)
+
 
     val range = (0L to (fin.toLocalDateTime.toLocalDate.toEpochDay - start.toLocalDateTime.toLocalDate.toEpochDay) by 7)
+    println(range)
     val days = range.map(d => Timestamp.valueOf(start.toLocalDateTime.plusDays(d)))
+    println(days)
 
     days.foreach(day => {
-      val after = Timestamp.valueOf(day.toLocalDateTime.plusHours(h).plusMinutes(min))
+      val after = Timestamp.valueOf(day.toLocalDateTime.plusHours(end._1).plusMinutes(end._2))
       toRes match {
         case Salon(idsalon, capacidad, tipo) => cur match {
-          case Some(CursoActivo(clave, secc, periodo)) => sql"insert into reservaciones (idsalon, fechaini, fechafin, clave, secc, periodo, nombre) values ($idsalon, $day, $after, $clave, $secc, $periodo, $name)".update
-          case None => sql"insert into reservaciones (idsalon, fechaini, fechafin, nombre) values ($idsalon, $day, $after, $name)".update
+          case Some(CursoActivo(clave, secc, periodo)) => {
+            val ins = sql"insert into reservaciones (idsalon, fechaini, fechafin, clave, secc, periodo, nombre) values ($idsalon, $day, $after, $clave, $secc, $periodo, $name)".update
+            Connection.executeUpdate(Reservacion, ins)
+            println("inserted value")
+          }
+          case None => {
+            val ins = sql"insert into reservaciones (idsalon, fechaini, fechafin, nombre) values ($idsalon, $day, $after, $name)".update
+            Connection.executeUpdate(Reservacion, ins)
+            println("inserted value")
+          }
         }
       }
     })
@@ -112,6 +138,12 @@ trait DeleteableReserv {
   def deleteHorarioCurso(toDel: CursoActivo) =
     toDel match {
       case CursoActivo(clave, secc, periodo) => sql"delete from reservaciones where clave = $clave and secc = $secc and periodo = $periodo"
+        .update
+    }
+
+  def deleteHorarioSalon(toDel: Salon) =
+    toDel match {
+      case Salon(idsalon, capacidad, tipo) => sql"delete from reservaciones where idsalon = $idsalon"
         .update
     }
 

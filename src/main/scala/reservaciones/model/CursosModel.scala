@@ -11,7 +11,7 @@ case class Curso(clave: String, secc: Int, titulo: String, prof: String) {
   override def toString: String = s"$clave $secc $titulo $prof"
 }
 
-object CursosModel extends SearchableCourse with InsertableCourse with DeletableCourse
+object CursosModel extends SearchableCourse
 
 
 trait SearchableCourse {
@@ -26,7 +26,11 @@ trait SearchableCourse {
         .query[Curso]
     }
 
-  def findCurosBySecc(secc: Int) =
+  def findCurso(toS: String) =
+    sql"select * from cursos where clave = $toS"
+    .query[Curso]
+
+  def findCursosBySecc(secc: Int) =
     sql"select * from cursos where secc = $secc"
       .query[Curso]
 
@@ -37,24 +41,4 @@ trait SearchableCourse {
   def findCursosByProfesor(prof: String) =
     sql"select * from cursos where prof = $prof"
     .query[Curso]
-}
-
-trait InsertableCourse {
-
-  def insertCurso(toIns: Curso) =
-    toIns match {
-      case Curso(cKey, cSecc, cTitulo, cProf) => sql"insert into cursos (clave, secc, titulo, prof) values ($cKey, $cSecc, $cTitulo, $cProf)"
-        .update
-    }
-
-}
-
-trait DeletableCourse {
-
-  def deleteCurso(toDel: Curso) =
-    toDel match {
-      case Curso(cKey, cSecc, _, _) => sql"delete from cursos where clave = $cKey and secc = $cSecc"
-        .update
-    }
-
 }

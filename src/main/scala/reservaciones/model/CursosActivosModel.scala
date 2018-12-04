@@ -22,13 +22,13 @@ trait SearchableCurActivo {
 
   def getAllCurrentActiveCourses() = {
     val today = Timestamp.valueOf(LocalDateTime.now())
-    sql"select c.clave, c.secc, c.periodo from cursosactivos c natural join periodos where $today between fechainicio and fechafin"
+    sql"select c.clave, c.secc, c.periodo from cursosactivos c, periodos p where c.periodo = p.titulo and ($today between p.fechaini and p.fechafin)"
       .query[CursoActivo]
   }
 
   def findCursoActivo(toSearch: CursoActivo) =
     toSearch match {
-      case CursoActivo(clave, secc, periodo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and periodo = $periodo"
+      case CursoActivo(clave, secc, periodo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and periodo = $"
         .query[CursoActivo]
     }
 

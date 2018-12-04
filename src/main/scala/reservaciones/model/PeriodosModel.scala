@@ -21,13 +21,13 @@ trait SearchablePeriod {
 
   def getCurrentPeriod() ={
     val today = Timestamp.valueOf(LocalDateTime.now())
-    sql"select * from periodos where $today between fechainicio and fechafin"
+    sql"select * from periodos where $today between fechaini and fechafin"
       .query[Periodo]
   }
 
   def findPeriodo(toSearch: Periodo) =
     toSearch match {
-      case Periodo(titulo, ini, fin) => sql"select * from periodos where titulo = $titulo and fechainicio = $ini and fechafin = $fin"
+      case Periodo(titulo, ini, fin) => sql"select * from periodos where titulo = $titulo and fechaini = $ini and fechafin = $fin"
         .query[Periodo]
     }
 
@@ -36,7 +36,7 @@ trait SearchablePeriod {
       .query[Periodo]
 
   def findPeriodosByIni(ini: Timestamp) =
-    sql"select * from periodos where fechainicio = $ini"
+    sql"select * from periodos where fechaini = $ini"
       .query[Periodo]
 
   def findPeriodosByFin(fin: Timestamp) =
@@ -48,7 +48,7 @@ trait InsertablePeriod {
 
   def insertPeriodo(toIns: Periodo) =
     toIns match {
-      case Periodo(titulo, ini, fin) => sql"insert into periodos (titulo, fechainicio, fechafin) values ($titulo, $ini, $fin)"
+      case Periodo(titulo, ini, fin) => sql"insert into periodos (titulo, fechaini, fechafin) values ($titulo, $ini, $fin)"
         .update
     }
 
@@ -58,7 +58,7 @@ trait DeletablePeriod {
 
   def deletePeriodo(toDel: Periodo) =
     toDel match {
-      case Periodo(titulo, fechaini, fechafin) => sql"delete from periodos where titulo = $titulo and fechainicio = $fechaini and fechafin = $fechafin"
+      case Periodo(titulo, fechaini, fechafin) => sql"delete from periodos where titulo = $titulo and fechaini = $fechaini and fechafin = $fechafin"
         .update
     }
 
