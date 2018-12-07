@@ -18,11 +18,11 @@ object Connection {
   def executeListQuery[A](query: Query0[A]) = query.to[List].transact(xa).unsafeRunSync
 
   def executeUpdate[A](t: A, up: Update0) = t match {
-    case Salon => up.withUniqueGeneratedKeys[Salon]("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
-    case Reservacion => up.withUniqueGeneratedKeys[Reservacion]("idsalon", "fechaini", "fechafin", "clave","secc","periodo", "nombre").transact(xa).unsafeRunSync
-    case Curso => up.withUniqueGeneratedKeys[Curso]("clave","secc","titulo", "prof").transact(xa).unsafeRunSync
-    case CursoActivo => up.withUniqueGeneratedKeys[CursoActivo]("clave", "secc", "periodo").transact(xa).unsafeRunSync
-    case Periodo => up.withUniqueGeneratedKeys[Periodo]("titulo", "fechainicio", "fechafin").transact(xa).unsafeRunSync
+    case Salon => up.run.transact(xa).unsafeRunSync
+    case Reservacion => up.run.transact(xa).unsafeRunSync
+    case Curso => up.run.transact(xa).unsafeRunSync
+    case CursoActivo => up.run.transact(xa).unsafeRunSync
+    case Periodo => up.run.transact(xa).unsafeRunSync
   }
 
 }

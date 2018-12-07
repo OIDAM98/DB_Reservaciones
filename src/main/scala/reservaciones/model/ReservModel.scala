@@ -74,12 +74,10 @@ trait TimetableSalones{
           case Some(CursoActivo(clave, secc, periodo)) => {
             val ins = sql"insert into reservaciones (idsalon, fechaini, fechafin, clave, secc, periodo, nombre) values ($idsalon, $day, $after, $clave, $secc, $periodo, $name)".update
             Connection.executeUpdate(Reservacion, ins)
-            println("inserted value")
           }
           case None => {
             val ins = sql"insert into reservaciones (idsalon, fechaini, fechafin, nombre) values ($idsalon, $day, $after, $name)".update
             Connection.executeUpdate(Reservacion, ins)
-            println("inserted value")
           }
         }
       }
@@ -106,7 +104,8 @@ trait TimetableSalones{
   }
 
   def getTimetableDia(dia: Timestamp) =
-    sql"select * from reservaciones where fechaini >= $dia and $dia <= fechafin".query[Reservacion]
+    sql"select * from reservaciones where fechaini >= $dia and $dia <= fechafin"
+      .query[Reservacion]
 
 }
 
@@ -147,8 +146,11 @@ trait DeleteableReserv {
         .update
     }
 
-  def deleteFromDia(ini: Timestamp, fin: Timestamp) =
+  def deleteFromPeriodo(ini: Timestamp, fin: Timestamp) =
     sql"delete from reservaciones where (fechaini between $ini and $fin) and (fechafin between $ini and $fin)".update
+
+  def deleteFromDia(day: Timestamp) =
+    sql"delete from reservaciones where $day between fechaini and fechafin".update
 
 }
 

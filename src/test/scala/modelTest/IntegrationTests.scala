@@ -78,24 +78,6 @@ class SalonesModelOpTest extends FunSpec with Matchers with GivenWhenThen with D
       res.head shouldBe a [Salon]
     }
 
-    it("insert a Salon to the Database"){
-      Given("a Salon to insert")
-      val ins = Salon("ia-205", 50, "C")
-      When("the Salon is inserted correctly to the Database")
-      SalonesModel.insertSalon(ins).withUniqueGeneratedKeys("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
-      Then("searching for that Salon should return that salon")
-      SalonesModel.findSalon(ins).option.transact(xa).unsafeRunSync shouldBe Some(ins)
-    }
-
-    it("delete a Salon from the Database"){
-      Given("a Salon to insert")
-      val del = Salon("ia-205", 50, "C")
-      When("the Salon is deleted correctly from the Database")
-      SalonesModel.deleteSalon(del).withUniqueGeneratedKeys("idsalon", "capacidad", "tipo").transact(xa).unsafeRunSync
-      Then("searching for that Salon should return None")
-      SalonesModel.findSalon(del).option.transact(xa).unsafeRunSync shouldBe None
-    }
-
   }
 
 }
@@ -192,7 +174,7 @@ class CursosModelOpTest extends FunSpec with Matchers with GivenWhenThen with DB
       Given("a certain Seccion to find")
       val secc = 10
       When("the list of Cursos of certain Seccion is obtained")
-      val res = CursosModel.findCurosBySecc(secc).to[List].transact(xa).unsafeRunSync
+      val res = CursosModel.findCursosBySecc(secc).to[List].transact(xa).unsafeRunSync
       Then("the list should not be empty")
       res should not be empty
       And("should be a List")
@@ -225,24 +207,6 @@ class CursosModelOpTest extends FunSpec with Matchers with GivenWhenThen with DB
       res shouldBe a [List[_]]
       And("should contain type Curso")
       res.head shouldBe a [Curso]
-    }
-
-    it("insert a Curso into the Database") {
-      Given("a certain Curso to insert into the Database")
-      val ins = Curso("basesdatos", 1, "Bases de Datos", "Zechinelli")
-      When("the Curso is correctly inserted")
-      CursosModel.insertCurso(ins).withUniqueGeneratedKeys[Curso]("clave","secc","titulo", "prof").transact(xa).unsafeRunSync
-      Then("searching for that Curso should return that Curso")
-      CursosModel.findCurso(ins).option.transact(xa).unsafeRunSync shouldBe Some(ins)
-    }
-
-    it("delete a Curso from the Database") {
-      Given("a certain Curso to delete from the Database")
-      val del = Curso("basesdatos", 1, "Bases de Datos", "Zechinelli")
-      When("the Curso is correctly deleted")
-      CursosModel.deleteCurso(del).withUniqueGeneratedKeys[Curso]("clave","secc","titulo", "prof").transact(xa).unsafeRunSync
-      Then("searchign for that Curso should return None")
-      CursosModel.findCurso(del).option.transact(xa).unsafeRunSync shouldBe None
     }
 
   }

@@ -28,7 +28,7 @@ trait SearchableCurActivo {
 
   def findCursoActivo(toSearch: CursoActivo) =
     toSearch match {
-      case CursoActivo(clave, secc, periodo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and periodo = $"
+      case CursoActivo(clave, secc, periodo) => sql"select * from cursosactivos where clave = $clave and secc = $secc and periodo = $periodo"
         .query[CursoActivo]
     }
 
