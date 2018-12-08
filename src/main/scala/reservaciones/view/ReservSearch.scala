@@ -66,7 +66,7 @@ object ReservSearch extends SimpleSwingApplication{
           case "idsalon" => {
             val opts = data.map{
               case Salon(idsalon, capacidad, tipo) => idsalon
-            }.toArray
+            }.distinct.toArray
 
             mod = new DefaultComboBoxModel[String](opts)
           }
@@ -74,7 +74,7 @@ object ReservSearch extends SimpleSwingApplication{
           case "capacidad" => {
             val opts = data.map{
               case Salon(idsalon, capacidad, tipo) => capacidad.toString
-            }.toArray
+            }.distinct.toArray
 
             mod = new DefaultComboBoxModel[String](opts)
           }
@@ -82,7 +82,7 @@ object ReservSearch extends SimpleSwingApplication{
           case "tipo" => {
             val opts = data.map{
               case Salon(idsalon, capacidad, tipo) => tipo
-            }.toArray
+            }.distinct.toArray
 
             mod = new DefaultComboBoxModel[String](opts)
           }

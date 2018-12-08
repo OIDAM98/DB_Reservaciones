@@ -8,7 +8,7 @@ case class Curso(clave: String, secc: Int, titulo: String, prof: String) {
   require(titulo.length <= 30)
   require(prof.length <= 30)
 
-  override def toString: String = s"$clave $secc $titulo $prof"
+  override def toString: String = s"$clave, $secc, $titulo, $prof"
 }
 
 object CursosModel extends SearchableCourse

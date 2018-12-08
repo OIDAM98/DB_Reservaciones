@@ -25,15 +25,19 @@ object MainPanel {
 
         contents += new Button( Action("Mostrar Horarios Salones") { showRoomsTimetables } )
         contents += new Button( Action("Mostrar Horarios Salones Segun Criterio") { ReservSearch.top.visible_=(true) } )
-        contents += new Button( Action("Mostrar Horarios Cursos") { showClassTimetables } )
-        contents += new Button( Action("Mostrar Todas Reservaciones") { showReservations } )
-        contents += new Button( Action("Mostrar Salones") { showRooms } )
-        contents += new Button( Action("Mostrar Cursos Activos") { showActiveCourses } )
-        contents += new Button( Action("Mostrar Periodos") { showPeriods } )
         contents += new Button( Action("Consulta Salas") { ClassRoomsSearch.top.visible_=(true) } )
         contents += new Button( Action("Modificacion Salas") { ModReserv.top.visible_=(true) } )
-        contents += new Button( Action("Consultar Horarios") { TimetableSearch.top.visible_=(true) } )
+        contents += new Button( Action("Mostrar Salones") { showRooms } )
         contents += new Button( Action("Reservar Salon") { ModHorario.top.visible_=(true) } )
+
+        contents += new Button( Action("Mostrar Todas Reservaciones") { showReservations } )
+
+        contents += new Button( Action("Consultar Horarios") { TimetableSearch.top.visible_=(true) } )
+        contents += new Button( Action("Mostrar Horarios Cursos") { showClassTimetables } )
+        contents += new Button( Action("Modificar Horario Curso") { ModCurso.top.visible_=(true) } )
+
+        contents += new Button( Action("Mostrar Cursos Activos") { showActiveCourses } )
+        contents += new Button( Action("Mostrar Periodos") { showPeriods } )
       }
 
       layout(buttons) = West

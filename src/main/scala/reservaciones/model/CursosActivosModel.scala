@@ -9,7 +9,7 @@ case class CursoActivo(clave: String, secc: Int, periodo: String){
   require(clave.length <= 10)
   require(periodo.length <= 20)
 
-  override def toString: String = s"$clave $secc $periodo"
+  override def toString: String = s"$clave, $secc, $periodo"
 }
 
 object CursosActivosModel extends SearchableCurActivo with InsertableCurActivo with DeletableCurActivo

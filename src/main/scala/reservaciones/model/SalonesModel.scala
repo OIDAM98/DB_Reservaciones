@@ -5,7 +5,7 @@ import doobie.implicits._
 case class Salon(idsalon: String, capacidad:Int, tipo: String){
   require(idsalon.length <=  8)
 
-  override val toString = s"$idsalon $capacidad $tipo"
+  override val toString = s"$idsalon, $capacidad, $tipo"
 }
 
 object SalonesModel extends SearchableClassroom

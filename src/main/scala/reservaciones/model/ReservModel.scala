@@ -6,9 +6,14 @@ import java.time.{DayOfWeek, LocalDateTime}
 import doobie.implicits._
 
 
-case class Reservacion(salon: String, fechaini: Timestamp, fechafin: Timestamp, clave: Option[String], secc: Option[Int], periodo: Option[String], nombre: String)
+case class Reservacion(salon: String, fechaini: Timestamp, fechafin: Timestamp, clave: Option[String], secc: Option[Int], periodo: Option[String], nombre: String){
+  val c = clave.getOrElse("-")
+  val s = secc.getOrElse("-")
+  val p = periodo.getOrElse("-")
+  override  def toString = s"$salon, ${fechaini.toString}, ${fechafin.toString}, $c, $s, $p, $nombre"
+}
 
-object ReservacionesModel extends SearchableReserv with TimetableSalones with TimetableCursos with DeleteableReserv with CheckInput
+object ReservacionesModel extends SearchableReserv with TimetableSalones with TimetableCursos with DeleteableReserv with ModifiableTimetable
 
 trait SearchableReserv{
 
@@ -157,23 +162,6 @@ trait DeleteableReserv {
   def deleteFromDia(day: Timestamp) =
     sql"delete from reservaciones where $day between fechaini and fechafin".update
 
-}
-
-trait CheckInput {
-
-  def isValidDateWithoutCourse(check: Timestamp): Boolean = {
-    val today = Timestamp.valueOf(LocalDateTime.now())
-    check after today
-  }
-
-  def isValidDateWithCourse(cDay: Timestamp, cCurso: CursoActivo) = {
-    val periodoCurso = Connection.executeQuery(PeriodosModel.findPeriodosByTitulo(cCurso.periodo))
-
-    periodoCurso match {
-      case Some(cur) => (cDay after cur.fechaini) && (cDay before cur.fechafin)
-      case None => false
-    }
-  }
 }
 
 trait ModifiableTimetable {
