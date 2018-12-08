@@ -20,7 +20,9 @@ object MainPanel {
   def getPanel: Panel = {
     new BorderPanel {
 
-      val buttons = new BoxPanel(Orientation.Vertical){
+
+      val buttons = new GridPanel(12, 1){
+
         contents += new Button( Action("Mostrar Horarios Salones") { showRoomsTimetables } )
         contents += new Button( Action("Mostrar Horarios Salones Segun Criterio") { ReservSearch.top.visible_=(true) } )
         contents += new Button( Action("Mostrar Horarios Cursos") { showClassTimetables } )
@@ -30,6 +32,8 @@ object MainPanel {
         contents += new Button( Action("Mostrar Periodos") { showPeriods } )
         contents += new Button( Action("Consulta Salas") { ClassRoomsSearch.top.visible_=(true) } )
         contents += new Button( Action("Modificacion Salas") { ModReserv.top.visible_=(true) } )
+        contents += new Button( Action("Consultar Horarios") { TimetableSearch.top.visible_=(true) } )
+        contents += new Button( Action("Reservar Salon") { ModHorario.top.visible_=(true) } )
       }
 
       layout(buttons) = West
@@ -77,7 +81,8 @@ object MainPanel {
   private def showReservations = {
 
     val rowData = Connection.executeListQuery(ReservacionesModel.getAllReservaciones()).map{
-      case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => Array(salon, fechaini.toString, fechafin.toString, clave.getOrElse("-"), secc.getOrElse("-"), periodo.getOrElse("-"), nombre).map(_.asInstanceOf[Any])
+      case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) =>
+        Array(salon, fechaini.toString, fechafin.toString, clave.getOrElse("-"), secc.getOrElse("-"), periodo.getOrElse("-"), nombre)
     }.toArray
 
     val names = ColumnInfo.getReservaciones()

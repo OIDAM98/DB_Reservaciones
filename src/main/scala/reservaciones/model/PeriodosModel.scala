@@ -11,7 +11,7 @@ case class Periodo(titulo: String, fechaini: Timestamp, fechafin: Timestamp){
   override def toString: String = s"$titulo $fechaini $fechafin"
 }
 
-object PeriodosModel extends SearchablePeriod with InsertablePeriod with DeletablePeriod
+object PeriodosModel extends SearchablePeriod
 
 trait SearchablePeriod {
 
@@ -42,24 +42,4 @@ trait SearchablePeriod {
   def findPeriodosByFin(fin: Timestamp) =
     sql"select * from periodos where fechafin = $fin"
       .query[Periodo]
-}
-
-trait InsertablePeriod {
-
-  def insertPeriodo(toIns: Periodo) =
-    toIns match {
-      case Periodo(titulo, ini, fin) => sql"insert into periodos (titulo, fechaini, fechafin) values ($titulo, $ini, $fin)"
-        .update
-    }
-
-}
-
-trait DeletablePeriod {
-
-  def deletePeriodo(toDel: Periodo) =
-    toDel match {
-      case Periodo(titulo, fechaini, fechafin) => sql"delete from periodos where titulo = $titulo and fechaini = $fechaini and fechafin = $fechafin"
-        .update
-    }
-
 }

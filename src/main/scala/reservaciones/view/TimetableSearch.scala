@@ -1,28 +1,31 @@
+
 package reservaciones.view
 
-import java.sql.{Timestamp}
+import java.awt.Color
+import java.sql.{Time, Timestamp}
 import java.time.{LocalDate, LocalDateTime, LocalTime}
 
-import javax.swing.{ JOptionPane}
+import javax.swing.JOptionPane
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 
+import scala.swing.Swing.LineBorder
 import scala.swing._
 import reservaciones.model._
 
-object ModReserv extends SimpleSwingApplication{
+object TimetableSearch extends SimpleSwingApplication{
+
+  var info = new Table(){
+    showGrid = false
+    border = LineBorder(Color.BLACK)
+  }
 
   var selectionDate: LocalDate = null
-  var selectionTime: LocalTime = null
   var selectionDateIni: LocalDate = null
   var selectionDateFin: LocalDate = null
   var selectionTimeIni: LocalTime = null
   var selectionTimeFin: LocalTime = null
 
-  val desde = new Label("Desde:")
-  val hasta = new Label("Hasta:")
-
   var comboDate:ComboBox[LocalDate] = null
-  var comboTime:ComboBox[LocalTime] = null
   var comboDateIni: ComboBox[LocalDate] = null
   var comboDateFin: ComboBox[LocalDate] = null
   var comboTimeIni: ComboBox[LocalTime] = null
@@ -31,32 +34,25 @@ object ModReserv extends SimpleSwingApplication{
   var selectDate:Button = null
   var selectDateTime:Button = null
 
+  var label: Label = new Label("")
+
   def top = new MainFrame {
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
     override def closeOperation() { dispose() }
 
-    title = "Reservación de Salas"
+    title = "Consulta de Horarios"
 
-    val reserv = Connection.executeListQuery(ReservacionesModel.getAllActiveReservaciones())
-
-    val dates = reserv.map {
+    val dates = Connection.executeListQuery(ReservacionesModel.getAllActiveReservaciones()).map {
       case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => Array(fechaini, fechafin)
-    }
-
-    val timesRes = reserv.map {
-      case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => Array(fechaini.toLocalDateTime.toLocalTime, fechafin.toLocalDateTime.toLocalTime)
     }
 
     val times = (7 to 21).map(h => LocalTime.of(h, 0))
 
     val validDates = dates.flatten.map(v => v.toLocalDateTime.toLocalDate).toSet.toList
-    val validTimes = timesRes.flatten.toSet.toList
 
     comboDate = new ComboBox(validDates)
     comboDate.visible = false
-    comboTime = new ComboBox(validTimes)
-    comboTime.visible = false
 
     val currPer = Connection.executeQuery(PeriodosModel.getCurrentPeriod())
     val dateIni = currPer.get.fechaini.toLocalDateTime.toLocalDate
@@ -76,70 +72,64 @@ object ModReserv extends SimpleSwingApplication{
     comboTimeFin = new ComboBox(times)
     comboTimeFin.visible = false
 
-    selectDate = new Button( Action("Anular Día y Hora") {
+    selectDate = new Button( Action("Buscar Día") {
       selectionDate = comboDate.selection.item
-      selectionTime = comboTime.selection.item
-
-      deleteDayTime
+      timetableDay
     })
     selectDate.visible = false
 
-    selectDateTime = new Button( Action("Anular Periodo") {
+    selectDateTime = new Button( Action("Buscar Dia y Hora") {
       selectionDateIni = comboDateIni.selection.item
       selectionDateFin = comboDateFin.selection.item
       selectionTimeIni = comboTimeIni.selection.item
       selectionTimeFin = comboTimeFin.selection.item
 
-      deletePeriod
+      timetablePeriod
 
     })
     selectDateTime.visible = false
 
+    label.visible = false
+
     preferredSize = new Dimension(350, 350)
-    contents = new GridPanel(10, 1){
-      contents += new Button( Action("Anular dada fecha y hora") {
+    contents = new BoxPanel(Orientation.Vertical){
+      contents += new Button( Action("Horario de un Día") {
         comboTimeIni.visible = false
         comboTimeFin.visible = false
         comboDateIni.visible = false
         comboDateFin.visible = false
         selectDateTime.visible = false
-        desde.visible = false
-        hasta.visible = false
 
 
         comboDate.visible = true
         selectDate.visible = true
-        comboTime.visible = true
       })
-      contents += new Button( Action("Anular dado periodo de tiempo") {
+      contents += new Button( Action("Horario de un Periodo") {
         comboDate.visible = false
         selectDate.visible = false
-        comboTime.visible = false
 
         comboTimeIni.visible = true
         comboTimeFin.visible = true
         comboDateIni.visible = true
         comboDateFin.visible = true
         selectDateTime.visible = true
-        desde.visible = true
-        hasta.visible = true
 
       } )
 
-
       contents += comboDate
-      contents += comboTime
       contents += selectDate
       contents += comboDateIni
       contents += comboTimeIni
       contents += comboDateFin
       contents += comboTimeFin
       contents += selectDateTime
+      contents += label
+      contents += new ScrollPane(info)
     }
 
   }
 
-  def deletePeriod() = {
+  def timetablePeriod() = {
     if(selectionDateIni != null && selectionDateFin != null && selectionTimeIni != null && selectionTimeFin != null) {
       if(((selectionDateFin.toEpochDay - selectionDateIni.toEpochDay) < 0) || selectionTimeIni.isAfter(selectionTimeFin)) {
         JOptionPane.showMessageDialog(null, "Input Error, check dates and times", "Error", JOptionPane.ERROR_MESSAGE)
@@ -147,19 +137,22 @@ object ModReserv extends SimpleSwingApplication{
       else{
         val ini = Timestamp.valueOf(LocalDateTime.of(selectionDateIni, selectionTimeIni))
         val fin = Timestamp.valueOf(LocalDateTime.of(selectionDateFin, selectionTimeFin))
-        try{
-          Connection.executeUpdate(Reservacion, ReservacionesModel.deleteFromPeriodo(ini, fin))
-          JOptionPane.showMessageDialog(null, "Borrado exitoso", "Confirmacion", JOptionPane.INFORMATION_MESSAGE)
-        }
-        catch {
-          case e: java.sql.SQLException => {
-            JOptionPane.showMessageDialog(null,
-              s"${e.getErrorCode}: + ${e.getMessage}",
-              "SQLError",
-              JOptionPane.ERROR_MESSAGE
-            )
-          }
-        }
+        val rowData = Connection.executeListQuery(ReservacionesModel.getTimetablePeriodo(ini, fin)).map{
+          case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => Array(salon, fechaini.toString, fechafin.toString, clave.getOrElse("-"), secc.getOrElse("-"), periodo.getOrElse("-"), nombre).map(_.asInstanceOf[Any])
+        }.toArray
+
+        val columns = ColumnInfo.getReservaciones()
+
+        val toUpdate = new Table(rowData, columns)
+
+
+        info.model = toUpdate.model
+
+        info.revalidate
+        info.repaint
+
+        label.text = s"Horario entre días: ${ini.toString} y ${fin.toString}"
+        label.visible = true
 
         comboDateIni.visible = false
         comboDateFin.visible = false
@@ -172,35 +165,32 @@ object ModReserv extends SimpleSwingApplication{
     }
   }
 
-  def deleteDayTime() = {
+  def timetableDay() = {
 
-    val d = Timestamp.valueOf(LocalDateTime.of(selectionDate, selectionTime))
+    if(selectionDate != null) {
 
-    try{
-      Connection.executeUpdate(Reservacion, ReservacionesModel.deleteFromDia(d))
-      JOptionPane.showMessageDialog(null, "Borrado exitoso", "Confirmacion", JOptionPane.INFORMATION_MESSAGE)
+      val rowData = Connection.executeListQuery(ReservacionesModel.getTimetableDia(Timestamp.valueOf(selectionDate.toString + " 00:00:00"))).map{
+        case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => Array(salon, fechaini.toString, fechafin.toString, clave.getOrElse("-"), secc.getOrElse("-"), periodo.getOrElse("-"), nombre).map(_.asInstanceOf[Any])
+      }.toArray
+
+      val columns = ColumnInfo.getReservaciones()
+
+      val toUpdate = new Table(rowData, columns)
+
+      info.model = toUpdate.model
+
+      info.revalidate
+      info.repaint
+
+      label.text = "Horario del día: " + selectionDate
+      label.visible = true
+
+      comboDate.visible = false
+      selectDate.visible = false
+
     }
-    catch {
-      case e: java.sql.SQLException => {
-        JOptionPane.showMessageDialog(null,
-          s"${e.getErrorCode}: + ${e.getMessage}",
-          "SQLError",
-          JOptionPane.ERROR_MESSAGE
-        )
-      }
-    }
-
-    comboDate.visible = false
-    comboTime.visible = false
-    selectDate.visible = false
-
 
   }
 
 
 }
-
-
-
-
-

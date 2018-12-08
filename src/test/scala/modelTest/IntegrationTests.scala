@@ -125,29 +125,6 @@ class PeriodosModelOpTest extends FunSpec with Matchers with GivenWhenThen with 
       res should not be empty
     }
 
-    val today = Timestamp.valueOf(LocalDateTime.now())
-    val tomorrow = Timestamp.valueOf(LocalDateTime.now().plusDays(1))
-
-    it("insert a Periodo to the Database") {
-      Given("a certain Periodo to insert to the Database")
-      val ins = Periodo("Testing 101", today, tomorrow)
-      When("the Periodo is correctly inserted")
-      PeriodosModel.insertPeriodo(ins).withUniqueGeneratedKeys[Periodo]("titulo", "fechainicio", "fechafin").transact(xa).unsafeRunSync
-      Then("searching for that Periodo should result that Periodo")
-      val res = PeriodosModel.findPeriodo(ins).option.transact(xa).unsafeRunSync
-      res shouldBe Some(ins)
-    }
-
-    it("delete a Periodo to the Database") {
-      Given("a certain Periodo to delete from the Database")
-      val del = Periodo("Testing 101", today, tomorrow)
-      When("the Periodo is correctly deleted")
-      PeriodosModel.deletePeriodo(del).withUniqueGeneratedKeys[Periodo]("titulo", "fechainicio", "fechafin").transact(xa).unsafeRunSync
-      Then("searching for that Periodo should result in None")
-      val res = PeriodosModel.findPeriodo(del).option.transact(xa).unsafeRunSync
-      res shouldBe None
-    }
-
   }
 
 }

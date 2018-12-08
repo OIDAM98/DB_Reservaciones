@@ -107,7 +107,12 @@ trait TimetableSalones{
     sql"select * from reservaciones where fechaini >= $dia and $dia <= fechafin"
       .query[Reservacion]
 
+  def getTimetablePeriodo(ini: Timestamp, fin: Timestamp) =
+    sql"select * from reservaciones where (fechaini between $ini and $fin) and (fechafin between $ini and $fin)"
+    .query[Reservacion]
+
 }
+
 
 trait TimetableCursos {
 
@@ -173,11 +178,24 @@ trait CheckInput {
 
 trait ModifiableTimetable {
 
-  def modifyTimetable(res: Reservacion) = {
-
+  def modifyTimetable(res: Reservacion, nRes: Reservacion) = {
+    val id = res.salon
+    val ini = res.fechaini
+    val fin = res.fechafin
+    nRes match {
+      case Reservacion(salon, fechaini, fechafin, clave, secc, periodo, nombre) => {
+        sql"""update reservaciones
+             |clave= $clave,
+             |secc= $secc,
+             |titulo= $periodo,
+             |nombre= $nombre
+             |where idsalon = $id and
+             |fechaini = $ini and
+             |fechafin = $fin
+             |"""
+          .update
+      }
+    }
   }
-
-  def modifyTimetable() =
-    sql""
 
 }
